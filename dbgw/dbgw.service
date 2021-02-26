@@ -1,0 +1,10 @@
+[Unit]
+Description=DB Gateway
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/dbgw
+#Restart=always
+
+[Install]
+WantedBy=multi-user.target
