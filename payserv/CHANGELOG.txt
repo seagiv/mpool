@@ -1,0 +1,228 @@
+PayServ version info
+
+2019-03-01 1.0.25
+ - ETH fix for Constantinople
+
+2019-01-24 1.0.24
+ - added MONA autopayments
+ - added DASH autopayments
+
+2019-01-04 1.0.23
+ - certCache.go moved to gutils
+ - reworked coidID-Tag system to compli with new IDsless coinapi
+
+2019-01-03 1.0.22
+ - Server.go reworked to be same as in other projects
+ - Utils.Version changed to support same format as other projects
+ - config.go renamed to initConfig.go 
+
+2019-01-02 1.0.21
+ - changed format of ETH, ETC addresses stored in protected storage to simple address:key 
+   format like other coins
+ - temporarily master key stored in /etc/mpool/security/payserv/test.key both test and prod
+
+2018-12-13 1.0.20
+ - cleaning code
+ - further changes and preparations for hashalot
+ - gutils moved to seagiv/common/gutils
+ - bitcoinAPI, EthereumAPI, constCoins moved to seagiv/common/coinapi
+ - rpccodescs/* removed, jsonrpc1 changed to foreign/jsonrpcf and fixed to support both geth and bitcoind based daemon
+ - hardcode of eth/etc passwords removed
+
+2018-12-11 1.0.19
+ - dataSource removed from dbgw confing and moved to encryptedStorage(Params.JSON)
+ - move all github modules (except ethereum-go) to /github.com/seagiv/foreign/
+ - /github.com/ethereum/go-ethereum/common/hexutil replaced with encoding/hex
+ - keccak256 replaced with SHA256 in esman
+ - ALTER TABLE `finances_withdrawal_transaction` CHANGE COLUMN `payment_info` `tx_fee` DECIMAL(50,20) NOT NULL DEFAULT '0' AFTER `reward_type`
+ - storing blockchain transaction fee into field tx_fee
+ - moved mpool projects to mpool as preparations for hashalot
+
+2018-11-26 1.0.18
+ - groupped bitcoind based send (PayServ.SendCoin) implemented
+ - Utils.SetStatus -> Utils.Enabled
+ - access to Utils.Enable restricted to pscli only
+ - Utils.GetCoinAPI implemented
+
+2018-11-20 1.0.17
+ - preliminary changes for grouped send
+ - PayServ.Resend replaced with PayServ.Send
+ - locks system rework, BurntSushi\locker removed and replaced with own
+ - PayServ.Approve on auto coins no more autosend, PayServ.Send call required
+ - PayServ.Send for non auto coins replaced with PayServ.SetStatus
+ - UPDATE finances_withdrawal_transaction SET blockchain_transaction_id = payment_info
+ - minor bug fixes
+
+2018-11-09 1.0.16
+ - RVN real funds sending support
+
+2018-11-06 1.0.15
+ - BCH real funds sending support
+ - ZcashAPI removed, logic combined with BitcoinAPI
+ - BitcoinAPI logic extended to support BTC, BCH, ZEC
+ - globals split into 3 pieces: constCommon, constCoins, constSecurity
+ - offline node functionality removed from BTC, BCH, ZEC and replaced with *coin*-tx
+
+2018-11-03 1.0.14
+ - BTC real funds sending support
+ - coins send and params rework for support different coins within same engine
+ - spiped reconfigured on payserv, admin-test and online nodes for one common scheme
+ - offline nodes reconfigured
+ - BTC offline node added to payserv
+ - BTC online node installed on 159.89.14.57
+ - ZEC online node reconfigured on 104.248.17.194
+
+2018-10-22 1.0.13
+ - ETC real funds sending support
+ - EthereumAPI rework for support of ETC
+ - ZCashAPI rework for support of different coins based on zcashd
+ - Coin.ETC.JSON added to encrypted storage
+
+2018-10-17 1.0.12
+ - implementation of send_retry in case of insufficient funds on our wallet
+ - resend extended to support send_retry status
+ - Ethereum and Zcash structs renamed to ETH and ZEC
+ - ETH nonce now stored in /var/lib/payserv/eth.nonce
+ - config: Ethereum section renamed to coinETH
+ - config: Zcash section renamed to coinZEC
+
+2018-10-16 1.0.11
+ - logging system rework
+ - getBalance moved to rpcCheck, *PayServ and *Check now use same function getBalance
+
+2018-10-10 1.0.10
+ - wallets: name removed from signature, read of date_name_update added
+ - pscli -signwallets implemented, example: pscli -signwallets -cert Admin_SVR.crt -key Admin_SVR.key
+
+2018-10-09 1.0.9
+ - FIX for accept4: too many open files
+ - ethereum check toward zero or negative amount added
+
+2018-10-06 1.0.8
+ - FIX: withdrawals amount check toward zero (amount - fee) 
+ - income id, fee, blockhash added to coinCP (used during balance of user_id = 1 checks)
+ - db and cache changes for coinCP:
+	DELETE FROM finances_coin_checkpoints;
+	DELETE FROM finances_user_balance_checkpoints;
+	ALTER TABLE `finances_coin_checkpoints`
+	ADD COLUMN `last_id_income` INT(11) NOT NULL AFTER `last_blockhash_proxypool`,
+	ADD COLUMN `last_fee_income` DECIMAL(50,20) NOT NULL AFTER `last_id_income`,
+	ADD COLUMN `last_blockhash_income` VARCHAR(254) NULL AFTER `last_fee_income`;
+
+	rm /var/lib/payserv/checkpoints.coin
+	rm /var/lib/payserv/checkpoints.user
+
+ - pscli -checkproxypool now uses coinCP checkpoint
+
+2018-10-05 1.0.7
+ - manual activation of PayServ after start implemented
+ - preliminary Shamir secret share scheme for protected storage
+ - Encrypted Storage Manager (esman) separated to independent application
+ - esman examples:
+	esman -init -number 3 -threshold 2 -directory /root
+	esman -create go/src/github.com/seagiv/esman/test/ -directory /root -storage /var/lib/payserv/storage.test -number 2
+	esman -list -storage /var/lib/payserv/storage.test
+	esman -manager -directory /root -number 2 - this one passes masterKey to payserv
+ - FIX: pscli -checkbalanceerrors - fixed checking user+coin combinations with zero withdrawals
+ - FIX: balance check for user Admin (userID = 1) fixed to take into count fee (transaction_type_id = 8)
+
+2018-10-02 1.0.6
+ - ethereum nonce check at start
+ - ethereum nonce handling reworked, timeout removed
+ - Resend implemented for send_error transactions
+
+2018-10-01 1.0.5
+ - preliminary implementation of protected storage (no masterKey encryption yet)
+ - InitServer, InitTLS rework for protected storage support
+ - all keys and certificaes moved to:
+	test: 		/var/lib/payserv/storage.test
+	production:	/var/lib/payserv/storage.prod
+
+2018-09-29 1.0.4
+ - ethereum nonce timeout changed 1200 -> 3600
+
+2018-09-27 1.0.3
+ - wallet address check during process withdrawal and autodecline in case of invalid
+ - wallet userID and coinID check during process withdrawal
+ - corrective transaction lock conditions fix
+
+2018-09-25 1.0.2
+ - automatic coin based checkpoint creation for one coin (pscli -checkproxypool 1)
+ - automatic coin based checkpoint creation for all coins (pscli -checkproxypools)
+ - automatic user based checkpoint creation for one user (pscli -checkbalance -userid 45 -coin 1)
+ - automatic user based checkpoint creation for all users (pscli -checkbalances)
+ - automatic sync and check between db and cache implemented for user and coin based checkpoints during service start
+ - dbgw version check implemented at payserv start
+
+2018-09-24 1.0.1
+ - rework of checkpoins for support user and coin based
+ - implementation of proxypool (coin based) checkpoints
+
+2018-09-21 1.0
+ - rework of dbgw (functions logically split into three rpc classes: Utils, Gateway and Corrections)
+ - rework of rpc server logic in general (added support for onConnect and onDisconnect calls)
+ - implementation of safecheck for Corrections (when is_calculated = false we will wait)
+ - rework of PayServ clasess along with (onConnect and onDisconnect)
+
+2018-09-17 0.9.9.1
+ - fix for proxypool check
+ - fix for corrective transactions
+
+2018-09-15 0.9.9
+ - renamed paycli -> pscli (and generated new key)
+ - removed payutils and moved some logic to pscli:
+	example(1): pscli -signtrans -cert AutoPay_SVR.crt -key AutoPay_SVR.key -transid 910
+	example(2): pscli -loadcert AutoPay_SVR.crt
+	example(3): pscli -checkbalanceerrors
+ - client pscli restricted to connect to payserv from local host only
+ - corrective transactions implemented: 
+	example(1): pscli -createcorrection -userid 33 -coinid 1 -poolid 17 -amount "1.0"
+ - callstack debug output reworked to support different params length
+ - fixed error when new checkpoint created during call of .Check()
+ - Ethereum and Zcash RPC servers (online and offline nodes) test implemented at service start
+
+2018-09-11 0.9.8
+ - preparations for corrective transactions: updated proxypool and user income signatures for corrections
+ - added balance to proxypool signature
+ - added ghost user transaction check against proxypool
+ - added balance check for proxypool
+
+2018-09-06 0.9.7
+ - zcash real coins sending support (using online node for transaction creation and sending and offline local node for signing)
+ - switching balances from finances_user_balance_transaction to finances_user_transaction for optimizations
+
+2018-08-31 0.9.6
+ - fix for very long balances 2M+ records: disabled checkpoint verification
+ - GasPrice limit changed 95 -> 23
+
+2018-08-20 0.9.5
+ - fix for very long balances 200K+ records
+
+2018-08-16 0.9.4
+ - Ethereum adress validation
+ - memory leak detection
+
+2018-07-13 0.9.3
+ - cached nonce for Ethereum to prevent overriding transactions
+ - gasPrice limited for Ethereum to 95
+
+2018-07-09 0.9.2
+ - users_userwallets checking (signature)
+ - internal rpc object tree rework
+ - Ethereum real coins sending support (via geth rpc, creating/signing  and use of eth_sendRawTransaction)
+ - withdrawal new statuses 'sending', 'send_error' support
+
+2018-06-07 0.9.1
+ First production version
+ - DB consistency checking
+ - finances_withdrawal_transaction checking (signature and consistency)
+ - finances_user_balance_transaction checking (signature and consistency)
+ - finances_proxypool_transactions checking (signature and consistency)
+ - cross checking 
+    finances_withdrawal_transaction + 
+    finances_user_balance_transaction + 
+    finances_proxypool_transactions
+ - finances_user_balance_checkpoints checking (signature and consistency, saved object version)
+ - declined transactions support
+ - coins_coin checking (signature)
+ - withdrawal statuses 'processing', 'processed', 'pending', 'approved', 'sent', 'declined' support

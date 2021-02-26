@@ -1,0 +1,10 @@
+[Unit]
+Description=PayServ
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/payserv
+#Restart=always
+
+[Install]
+WantedBy=multi-user.target
